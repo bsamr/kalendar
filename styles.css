@@ -108,6 +108,16 @@ button { font-family: inherit; letter-spacing: inherit; }
 .btn.danger:hover { background: #fbe2e2; }
 
 /* ========== Segment toggle ========== */
+.week-header {
+  display: flex;
+  justify-content: center;
+  padding: 60px 24px 28px;
+  max-width: calc(1100px + 48px);
+  margin: 0 auto;
+  width: 100%;
+}
+.week-header[hidden] { display: none; }
+
 .viewtoggle {
   display: inline-flex;
   background: var(--surface-alt);

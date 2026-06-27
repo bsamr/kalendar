@@ -90,7 +90,21 @@ function renderWeekdays() {
   });
 }
 
+function placeToggle() {
+  const toggle = document.querySelector('.viewtoggle');
+  const weekHeader = document.getElementById('weekHeader');
+  const actions = document.querySelector('.topbar .actions');
+  if (viewMode === 'week') {
+    if (toggle.parentElement !== weekHeader) weekHeader.appendChild(toggle);
+    weekHeader.hidden = false;
+  } else {
+    if (toggle.parentElement !== actions) actions.insertBefore(toggle, actions.firstChild);
+    weekHeader.hidden = true;
+  }
+}
+
 function renderMonth() {
+  placeToggle();
   if (viewMode === 'week') return renderWeek();
   const title = document.getElementById('monthTitle');
   title.textContent = `${MONTHS[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
