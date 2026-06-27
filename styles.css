@@ -215,7 +215,7 @@ button { font-family: inherit; letter-spacing: inherit; }
   align-items: stretch;
 }
 .grid.week .cell { padding: 14px; }
-.grid.week .preview { white-space: normal; padding: 6px 6px 6px 10px; gap: 8px; align-items: center; }
+.grid.week .preview { white-space: normal; padding: 6px 6px 6px 10px; gap: 4px; align-items: center; }
 .grid.week .preview::before { left: 4px; top: 8px; bottom: 8px; }
 .preview-check {
   width: 16px; height: 16px;
