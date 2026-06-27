@@ -95,6 +95,7 @@ function renderMonth() {
   const title = document.getElementById('monthTitle');
   title.textContent = `${MONTHS[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
 
+  document.getElementById('weekdays').className = 'weekdays';
   const grid = document.getElementById('grid');
   grid.className = 'grid';
   grid.innerHTML = '';
@@ -125,6 +126,7 @@ function renderWeek() {
   const endStr = `${end.getDate()} ${MONTHS_GEN[end.getMonth()]} ${end.getFullYear()}`;
   title.textContent = `${startStr} – ${endStr}`;
 
+  document.getElementById('weekdays').className = 'weekdays week';
   const grid = document.getElementById('grid');
   grid.className = 'grid week';
   grid.innerHTML = '';
