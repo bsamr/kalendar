@@ -3,6 +3,7 @@
 // ---------- Состояние ----------
 const STORAGE_KEY = 'kalendar.state.v1';
 const SETTINGS_KEY = 'kalendar.settings.v1';
+const VIEW_KEY = 'kalendar.view.v1';
 
 const MONTHS = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
                 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
@@ -13,7 +14,8 @@ const GIST_FILENAME = 'kalendar.json';
 
 let state = loadLocal() || { tasks: [], updatedAt: 0 };
 let settings = loadSettings() || { token: '', gistId: '' };
-let viewDate = startOfMonth(new Date());
+let viewMode = localStorage.getItem(VIEW_KEY) === 'week' ? 'week' : 'month';
+let viewDate = viewMode === 'week' ? startOfWeek(new Date()) : startOfMonth(new Date());
 let openDate = null;
 let remoteUpdatedAt = 0;
 let pushTimer = null;
@@ -21,6 +23,17 @@ let isPushing = false;
 
 // ---------- Утилиты ----------
 function startOfMonth(d) { return new Date(d.getFullYear(), d.getMonth(), 1); }
+function startOfWeek(d) {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const offset = (x.getDay() + 6) % 7; // Mon=0
+  x.setDate(x.getDate() - offset);
+  return x;
+}
+function addDays(d, n) {
+  const x = new Date(d);
+  x.setDate(x.getDate() + n);
+  return x;
+}
 function isoDate(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -78,14 +91,15 @@ function renderWeekdays() {
 }
 
 function renderMonth() {
+  if (viewMode === 'week') return renderWeek();
   const title = document.getElementById('monthTitle');
   title.textContent = `${MONTHS[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
 
   const grid = document.getElementById('grid');
+  grid.className = 'grid';
   grid.innerHTML = '';
 
   const firstDay = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
-  // Понедельник = 0
   const offset = (firstDay.getDay() + 6) % 7;
   const start = new Date(firstDay);
   start.setDate(1 - offset);
@@ -100,25 +114,50 @@ function renderMonth() {
   }
 }
 
-function renderCell(date, currentMonth, today) {
+function renderWeek() {
+  const title = document.getElementById('monthTitle');
+  const end = addDays(viewDate, 6);
+  const sameMonth = viewDate.getMonth() === end.getMonth();
+  const sameYear = viewDate.getFullYear() === end.getFullYear();
+  const startStr = sameMonth
+    ? `${viewDate.getDate()}`
+    : `${viewDate.getDate()} ${MONTHS_GEN[viewDate.getMonth()]}${sameYear ? '' : ' ' + viewDate.getFullYear()}`;
+  const endStr = `${end.getDate()} ${MONTHS_GEN[end.getMonth()]} ${end.getFullYear()}`;
+  title.textContent = `${startStr} – ${endStr}`;
+
+  const grid = document.getElementById('grid');
+  grid.className = 'grid week';
+  grid.innerHTML = '';
+
+  const today = new Date();
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(viewDate, i);
+    // В недельном виде все ячейки относятся к текущему диапазону — не приглушаем
+    grid.appendChild(renderCell(d, d.getMonth(), today, { weekMode: true }));
+  }
+}
+
+function renderCell(date, currentMonth, today, opts = {}) {
   const cell = document.createElement('div');
   cell.className = 'cell';
   const iso = isoDate(date);
   cell.dataset.date = iso;
-  if (date.getMonth() !== currentMonth) cell.classList.add('other-month');
+  if (!opts.weekMode && date.getMonth() !== currentMonth) cell.classList.add('other-month');
   if (date.getDay() === 0 || date.getDay() === 6) cell.classList.add('weekend');
   if (sameDate(date, today)) cell.classList.add('today');
 
   const num = document.createElement('div');
   num.className = 'daynum';
-  num.textContent = date.getDate();
+  num.textContent = opts.weekMode
+    ? `${WEEKDAYS[(date.getDay() + 6) % 7]} ${date.getDate()}`
+    : date.getDate();
   cell.appendChild(num);
 
   const dayTasks = state.tasks
     .filter(t => t.date === iso)
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-  const maxPreview = 3;
+  const maxPreview = opts.weekMode ? 20 : 3;
   dayTasks.slice(0, maxPreview).forEach(task => {
     const p = document.createElement('div');
     p.className = 'preview' + (task.done ? ' done' : '');
@@ -595,17 +634,35 @@ function bindSettings() {
 // ---------- Биндинги ----------
 function bind() {
   document.getElementById('prevBtn').addEventListener('click', () => {
-    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
+    viewDate = viewMode === 'week'
+      ? addDays(viewDate, -7)
+      : new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
     renderMonth();
   });
   document.getElementById('nextBtn').addEventListener('click', () => {
-    viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
+    viewDate = viewMode === 'week'
+      ? addDays(viewDate, 7)
+      : new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
     renderMonth();
   });
   document.getElementById('todayBtn').addEventListener('click', () => {
-    viewDate = startOfMonth(new Date());
+    viewDate = viewMode === 'week' ? startOfWeek(new Date()) : startOfMonth(new Date());
     renderMonth();
   });
+
+  const setView = (mode) => {
+    viewMode = mode;
+    localStorage.setItem(VIEW_KEY, mode);
+    viewDate = mode === 'week' ? startOfWeek(new Date()) : startOfMonth(new Date());
+    document.getElementById('viewMonthBtn').setAttribute('aria-selected', mode === 'month');
+    document.getElementById('viewWeekBtn').setAttribute('aria-selected', mode === 'week');
+    renderMonth();
+  };
+  document.getElementById('viewMonthBtn').addEventListener('click', () => setView('month'));
+  document.getElementById('viewWeekBtn').addEventListener('click', () => setView('week'));
+  // Применяем сохранённый режим к кнопкам при старте
+  document.getElementById('viewMonthBtn').setAttribute('aria-selected', viewMode === 'month');
+  document.getElementById('viewWeekBtn').setAttribute('aria-selected', viewMode === 'week');
 
   document.querySelectorAll('[data-close]').forEach(el => {
     el.addEventListener('click', () => {
