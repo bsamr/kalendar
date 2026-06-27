@@ -184,12 +184,30 @@ function renderCell(date, currentMonth, today, opts = {}) {
     p.className = 'preview' + (task.done ? ' done' : '');
     p.draggable = true;
     p.dataset.taskId = task.id;
-    const mark = document.createElement('span');
-    mark.className = 'mark';
-    mark.textContent = task.done ? '✓' : '•';
+    if (opts.weekMode) {
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.className = 'preview-check';
+      cb.checked = !!task.done;
+      cb.addEventListener('click', (e) => e.stopPropagation());
+      cb.addEventListener('mousedown', (e) => e.stopPropagation());
+      cb.addEventListener('change', (e) => {
+        e.stopPropagation();
+        task.done = cb.checked;
+        touch();
+        renderMonth();
+      });
+      p.appendChild(cb);
+    } else {
+      const mark = document.createElement('span');
+      mark.className = 'mark';
+      mark.textContent = task.done ? '✓' : '•';
+      p.appendChild(mark);
+    }
     const txt = document.createElement('span');
+    txt.className = 'preview-text';
     txt.textContent = task.text;
-    p.append(mark, txt);
+    p.appendChild(txt);
     attachDragSource(p, task.id);
     cell.appendChild(p);
   });

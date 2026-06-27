@@ -215,7 +215,17 @@ button { font-family: inherit; letter-spacing: inherit; }
   align-items: stretch;
 }
 .grid.week .cell { padding: 14px; }
-.grid.week .preview { white-space: normal; }
+.grid.week .preview { white-space: normal; padding: 6px 6px 6px 10px; gap: 8px; align-items: center; }
+.grid.week .preview::before { left: 4px; top: 8px; bottom: 8px; }
+.preview-check {
+  width: 16px; height: 16px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--accent);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+.preview-text { flex: 1; min-width: 0; }
 
 /* ========== Cells ========== */
 .cell {
