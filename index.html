@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f8fa">
+  <title>Календарь задач</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="nav">
+      <button id="prevBtn" class="iconbtn" aria-label="Предыдущий месяц">‹</button>
+      <h1 id="monthTitle">—</h1>
+      <button id="nextBtn" class="iconbtn" aria-label="Следующий месяц">›</button>
+    </div>
+    <div class="actions">
+      <button id="todayBtn" class="btn">Сегодня</button>
+      <span id="syncStatus" class="status" title="Статус синхронизации">локально</span>
+      <button id="settingsBtn" class="iconbtn" aria-label="Настройки">⚙</button>
+    </div>
+  </header>
+
+  <div class="weekdays" id="weekdays"></div>
+  <main id="grid" class="grid" aria-label="Сетка месяца"></main>
+
+  <!-- Панель дня -->
+  <div id="dayPanel" class="panel" hidden>
+    <div class="panel-backdrop" data-close></div>
+    <section class="panel-body" role="dialog" aria-modal="true" aria-labelledby="dayTitle">
+      <header class="panel-head">
+        <h2 id="dayTitle">—</h2>
+        <button class="iconbtn" data-close aria-label="Закрыть">✕</button>
+      </header>
+      <form id="newTaskForm" class="new-task">
+        <input id="newTaskInput" type="text" placeholder="Новая задача — Enter, чтобы добавить" autocomplete="off">
+      </form>
+      <ul id="taskList" class="task-list"></ul>
+    </section>
+  </div>
+
+  <!-- Настройки -->
+  <div id="settingsPanel" class="panel" hidden>
+    <div class="panel-backdrop" data-close></div>
+    <section class="panel-body" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <header class="panel-head">
+        <h2 id="settingsTitle">Настройки синхронизации</h2>
+        <button class="iconbtn" data-close aria-label="Закрыть">✕</button>
+      </header>
+      <div class="settings">
+        <label>
+          <span>GitHub Personal Access Token <small>(scope: gist)</small></span>
+          <input id="tokenInput" type="password" placeholder="ghp_…" autocomplete="off">
+        </label>
+        <label>
+          <span>Gist ID</span>
+          <div class="row">
+            <input id="gistIdInput" type="text" placeholder="например: 8a1b2c3d…" autocomplete="off">
+            <button id="createGistBtn" class="btn" type="button">Создать новый</button>
+          </div>
+        </label>
+        <div class="settings-actions">
+          <button id="saveSettingsBtn" class="btn primary" type="button">Сохранить</button>
+          <button id="pullNowBtn" class="btn" type="button">Подтянуть сейчас</button>
+          <button id="clearTokenBtn" class="btn danger" type="button">Стереть токен</button>
+        </div>
+        <p class="hint">
+          Токен хранится только в этом браузере (localStorage). Создать токен: GitHub →
+          Settings → Developer settings → Personal access tokens → Tokens (classic) →
+          Generate, отметь только scope <code>gist</code>.
+        </p>
+        <p id="settingsMsg" class="msg" aria-live="polite"></p>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
