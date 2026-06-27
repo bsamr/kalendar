@@ -92,12 +92,17 @@ function renderWeekdays() {
 
 function placeToggle() {
   const toggle = document.querySelector('.viewtoggle');
+  const nav = document.querySelector('.nav');
+  const topbar = document.querySelector('.topbar');
   const weekHeader = document.getElementById('weekHeader');
-  const actions = document.querySelector('.topbar .actions');
+  const actions = document.querySelector('.actions');
+  if (!toggle || !nav || !topbar || !weekHeader || !actions) return;
   if (viewMode === 'week') {
+    if (nav.parentElement !== weekHeader) weekHeader.appendChild(nav);
     if (toggle.parentElement !== weekHeader) weekHeader.appendChild(toggle);
     weekHeader.hidden = false;
   } else {
+    if (nav.parentElement !== topbar) topbar.insertBefore(nav, topbar.firstChild);
     if (toggle.parentElement !== actions) actions.insertBefore(toggle, actions.firstChild);
     weekHeader.hidden = true;
   }
